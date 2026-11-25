@@ -1,7 +1,11 @@
 param(
   [int]$DelaySeconds = 12,
   [int]$HostPid = 0,
-  [string]$TaskName = 'DshSelfRestart'
+  [string]$TaskName = 'DshSelfRestart',
+  # Passed through to restart-dsh.ps1 so the whole chain can be exercised without
+  # killing anything: it registers the real task and runs the real script, which
+  # then stops at its dry-run gate.
+  [switch]$DryRun
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,6 +31,7 @@ if (-not (Test-Path $script)) {
 # and closes with the process. It is not a resident task either — the task is
 # deleted by the caller once the restart completes.
 $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -GraceSeconds {1} -HostPid {2}' -f $script, $DelaySeconds, $HostPid
+if ($DryRun) { $arguments += ' -DryRun -SkipApproval' }
 
 $xml = @"
 <?xml version="1.0" encoding="UTF-16"?>
