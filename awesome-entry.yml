@@ -1,14 +1,14 @@
 # 投稿条目草稿：合并后放到 awesome-dsh-plugin 仓库
-# 路径：data/plugins/lwsyidong__dsh-restart-relay.yml
+# 路径：data/plugins/Yi-qing-dev__dsh-restart-relay.yml
 #
 # 注意：description 会被拿代码核对，不要写夸大内容。
 # category 可选值：agi ui usage theme model identity session memory tools wsl
 # browser vision voice docs skill workflow git notify dev security remote market fun
 #
-# 待办：仓库建好后把上面的 lwsyidong 换成真实 owner（已知是 lwsyidong，无需改）。
+# 待办：仓库建好后把上面的 Yi-qing-dev 换成真实 owner（已知是 Yi-qing-dev，无需改）。
 
-url: https://github.com/lwsyidong/dsh-restart-relay
-name: lwsyidong/dsh-restart-relay
+url: https://github.com/Yi-qing-dev/dsh-restart-relay
+name: Yi-qing-dev/dsh-restart-relay
 category: tools
 description:
   en: >-

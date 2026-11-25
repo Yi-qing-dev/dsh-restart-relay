@@ -31,13 +31,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lwsyidong/dsh-restart-relay.git"
+    "url": "git+https://github.com/Yi-qing-dev/dsh-restart-relay.git"
   },
-  "homepage": "https://github.com/lwsyidong/dsh-restart-relay#readme",
+  "homepage": "https://github.com/Yi-qing-dev/dsh-restart-relay#readme",
   "bugs": {
-    "url": "https://github.com/lwsyidong/dsh-restart-relay/issues"
+    "url": "https://github.com/Yi-qing-dev/dsh-restart-relay/issues"
   },
-  "author": "lwsyidong",
+  "author": "Yi-qing-dev",
   "license": "MIT",
   "dsh": {
     "bundle": {

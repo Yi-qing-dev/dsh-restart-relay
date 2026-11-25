@@ -74,7 +74,7 @@ Search `dsh-restart-relay` in the DSH community market and click install.
 Or from the command line:
 
 ```sh
-dsh plugin --profile desktop add github:lwsyidong/dsh-restart-relay
+dsh plugin --profile desktop add github:Yi-qing-dev/dsh-restart-relay
 ```
 
 Then **restart DSH once** so the plugin loads.

@@ -74,7 +74,7 @@ DeepSeek Harness 的插件、bundle、CLI 版本更新后，要重启宿主进�
 或者用命令行：
 
 ```sh
-dsh plugin --profile desktop add github:lwsyidong/dsh-restart-relay
+dsh plugin --profile desktop add github:Yi-qing-dev/dsh-restart-relay
 ```
 
 装完**重启一次 DSH**，插件才会加载。
