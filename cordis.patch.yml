@@ -1,0 +1,4 @@
+# dsh-restart-relay bundle patch — inserts the restart-relay plugin row.
+- insert:
+    - id: restart-relay
+      name: dsh-restart-relay

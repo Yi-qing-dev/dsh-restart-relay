@@ -1,0 +1,51 @@
+{
+  "name": "dsh-restart-relay",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Restart the DSH host without losing work: a countdown strip with restart-now/later, an automatic restart when it expires, and continuation prompts so running sessions resume afterwards.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "scripts",
+    "assets",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "dsh": ">=0.2.0"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "restart",
+    "reload",
+    "continuation",
+    "windows"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lwsyidong/dsh-restart-relay.git"
+  },
+  "homepage": "https://github.com/lwsyidong/dsh-restart-relay#readme",
+  "bugs": {
+    "url": "https://github.com/lwsyidong/dsh-restart-relay/issues"
+  },
+  "author": "lwsyidong",
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}
