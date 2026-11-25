@@ -10,6 +10,12 @@
 #   2. close a terminal window that is still on screen with nothing running in it.
 #      Task Scheduler hands the restarter to Windows Terminal / conhost, and that
 #      host can outlive the shell it was hosting — leaving an empty black window.
+#
+# Order matters. This runs a few seconds after boot, while the restarter is often
+# STILL RUNNING (it is waiting for the port, then writing its log). Deleting a
+# running scheduled task terminates the process that owns it — which kills the
+# restarter mid-flight, before it records "restart done" or the measured timing.
+# So: wait for the task to finish first, then delete it.
 
 $ErrorActionPreference = 'Continue'
 
@@ -21,16 +27,59 @@ function Write-Log([string]$message) {
   Add-Content -Path $log -Value $line -Encoding UTF8
 }
 
-# 1. the task has already run; it will not run again
-$existing = & schtasks.exe /query /tn $taskName 2>&1
-if ($existing -notmatch 'ERROR') {
-  & schtasks.exe /delete /tn $taskName /f 2>&1 | Out-Null
-  Write-Log "deleted scheduled task $taskName"
-} else {
+# State of a scheduled task, or $null when it does not exist.
+#
+# Uses Get-ScheduledTask rather than parsing `schtasks` output: schtasks localises
+# its errors, so a regex looking for "ERROR" silently reports every missing task
+# as present on a Chinese (or any non-English) Windows.
+function Get-TaskState([string]$name) {
+  $task = Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue
+  if ($null -eq $task) { return $null }
+  $first = @($task)[0]
+  if ($null -eq $first) { return $null }
+  return [string]$first.State
+}
+
+# 1. let the restarter finish, then drop the task
+$state = Get-TaskState $taskName
+if ($null -eq $state) {
   Write-Log "scheduled task $taskName already gone"
+} else {
+  $deadline = (Get-Date).AddSeconds(90)
+  $waited = 0
+  while ($state -eq 'Running' -and (Get-Date) -lt $deadline) {
+    Start-Sleep -Seconds 1
+    $waited++
+    $state = Get-TaskState $taskName
+  }
+
+  if ($state -eq 'Running') {
+    # Still running after 90s: leave it alone rather than kill a working restart.
+    Write-Log "task $taskName still running after ${waited}s; leaving it for the next boot"
+  } else {
+    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+    if ($null -eq (Get-TaskState $taskName)) {
+      Write-Log "deleted scheduled task $taskName (waited ${waited}s for it to finish)"
+    } else {
+      Write-Log "could not delete task $taskName"
+    }
+  }
 }
 
 # 2. a terminal window whose shell has exited is a dead window
+#
+# But only touch it once no restarter is alive. The restarter may still be polling
+# for the new host, and it runs inside that console: closing the console host
+# breaks any console program it calls afterwards. (That is exactly how a curl-based
+# port probe once failed 52 seconds in a row and then launched a duplicate DSH.)
+$restarters = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue |
+  Where-Object { $_.CommandLine -and $_.CommandLine -match 'restart-dsh\.ps1' })
+
+if ($restarters.Count -gt 0) {
+  Write-Log ("$($restarters.Count) restarter process(es) still alive; leaving terminal windows alone")
+  exit 0
+}
+
 $cutoff = (Get-Date).AddMinutes(-10)
 $hosts = @(Get-CimInstance Win32_Process -Filter "Name='OpenConsole.exe' OR Name='WindowsTerminal.exe'" -ErrorAction SilentlyContinue)
 $closed = 0

@@ -61,16 +61,34 @@ function Get-DshListenPorts {
   return $ports | Where-Object { $_ -gt 0 } | Sort-Object -Unique
 }
 
+function Test-PortOpen([int]$port) {
+  # A plain TCP connect, not curl.exe.
+  #
+  # curl was the original probe and it broke in the worst possible way: curl.exe
+  # is a console program, so once the console host dies (the cleanup helper can
+  # close an empty terminal window, and this script may be running inside it) it
+  # stops working entirely. The retry loop then concludes "DSH never came up"
+  # and launches a second instance. .NET sockets need no console at all.
+  try {
+    $client = New-Object System.Net.Sockets.TcpClient
+    $async = $client.BeginConnect('127.0.0.1', $port, $null, $null)
+    $signalled = $async.AsyncWaitHandle.WaitOne(1500)
+    if (-not $signalled) { $client.Close(); return $false }
+    $client.EndConnect($async)
+    $client.Close()
+    return $true
+  } catch {
+    return $false
+  }
+}
+
 function Test-DshReachable([int[]]$ports) {
-  # Any HTTP status below 500 means the server is up and routing. 401 and 404 are
-  # *successes* here: the GUI answers 401 without an auth cookie and the plugin
-  # host answers 404 on paths it does not own. Only a transport failure (nothing
-  # listening yet) counts as "not ready".
+  # First listening port wins. The GUI answers 401 without a cookie and the
+  # plugin host answers 404 on paths it does not own, so an HTTP status check
+  # would need per-port expectations; a bound socket is the signal that matters
+  # here — it only appears once the new host has started listening.
   foreach ($port in $ports) {
-    $code = & curl.exe -s -o NUL -w '%{http_code}' --max-time 2 "http://127.0.0.1:$port/" 2>$null
-    if ($LASTEXITCODE -eq 0 -and $code -match '^\d{3}$' -and [int]$code -lt 500) {
-      return $port
-    }
+    if (Test-PortOpen $port) { return $port }
   }
   return 0
 }
@@ -176,24 +194,27 @@ while ($attempt -lt $MaxAttempts -and -not $ok) {
   }
   $left = Get-Process 'DeepSeek Harness' -ErrorAction SilentlyContinue
   if ($left) {
-    Write-Log ("warning: {0} process(es) still alive" -f ($left | Measure-Object).Count)
+    # Not a failure: on a retry the app we launched a moment ago is still here.
+    # Launching another copy because we mistook it for a failed start is how
+    # duplicate instances appear, so only launch when nothing is running.
+    Write-Log ("warning: {0} process(es) still alive; not relaunching" -f ($left | Measure-Object).Count)
   } else {
     Write-Log 'all dsh processes exited'
-  }
 
-  Start-Sleep -Seconds 3
-  Write-Log 'relaunching DeepSeek Harness'
-  # Redirect the child's stdio to files instead of letting it inherit this
-  # script's console. If DSH inherits our handles it keeps them after we exit;
-  # the console goes away with us, and the next console.info() inside
-  # electron-updater dies with "write EPIPE" and pops a main-process error box.
-  $outLog = Join-Path $dsh 'dsh-stdout.log'
-  $errLog = Join-Path $dsh 'dsh-stderr.log'
-  try {
-    Start-Process -FilePath $exe -RedirectStandardOutput $outLog -RedirectStandardError $errLog
-  } catch {
-    Write-Log ("redirected launch failed ({0}); falling back to plain launch" -f $_.Exception.Message)
-    Start-Process -FilePath $exe
+    Start-Sleep -Seconds 3
+    Write-Log 'relaunching DeepSeek Harness'
+    # Redirect the child's stdio to files instead of letting it inherit this
+    # script's console. If DSH inherits our handles it keeps them after we exit;
+    # the console goes away with us, and the next console.info() inside
+    # electron-updater dies with "write EPIPE" and pops a main-process error box.
+    $outLog = Join-Path $dsh 'dsh-stdout.log'
+    $errLog = Join-Path $dsh 'dsh-stderr.log'
+    try {
+      Start-Process -FilePath $exe -RedirectStandardOutput $outLog -RedirectStandardError $errLog
+    } catch {
+      Write-Log ("redirected launch failed ({0}); falling back to plain launch" -f $_.Exception.Message)
+      Start-Process -FilePath $exe
+    }
   }
 
   # Wait for the new Host to answer on some loopback port, not for a fixed delay.
