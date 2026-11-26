@@ -99,7 +99,9 @@ Other actions: `approve` (now), `defer` (later), `status`.
 
 ## What it actually does
 
-"Restart" here means **close DSH and open it again** — the same thing as quitting it yourself and double-clicking the icon. The difference is that everything worth notifying gets notified first.
+"Restart" here means **force-ending DSH's process tree and relaunching the same executable**. It does **not** go through the app's normal quit sequence, so the flushes and disposals that run in `before-quit` do not happen.
+
+That is not the same as quitting from the tray and reopening, or the Help menu's "Restart App and Host", which use the app's own graceful shutdown. When you need a clean teardown (editing pnpm configuration, install/uninstall errors, file-lock trouble), use the app's own restart or the tray; this plugin covers the **unattended** case.
 
 One restart, step by step:
 
@@ -158,6 +160,8 @@ Start with these two logs — they answer most questions directly:
 
 - **Windows + DSH Desktop (the `desktop` profile) only.** macOS / Linux and the `web` / `tui` profiles are untested.
 - That terminal window sits small in the bottom-right corner at the bottom of the z-order (see above); cleanup runs on the next boot, so it can linger until the new process is up.
+- **It force-ends the process tree instead of quitting gracefully.** The OS releases the file handles the process held, so no locks are left behind; but the things only the app's quit hooks would do — flushing buffers, clearing temp files, gracefully stopping children that are not in the process tree — do not happen.
+- **The relaunch does not carry the original command-line arguments.** A standard install needs none, but if you started DSH with custom flags or a non-default profile, it comes back with the default startup.
 - The engine itself prints "task stopped / this turn was interrupted" for the turn it cut off. **That message cannot be removed** — it is core behaviour. The continuation prompt exists so the receiving session knows it is expected and keeps working instead of stopping to ask.
 - Task Scheduler launches PowerShell under `svchost`. A strict security policy can still block it; when that happens, `restart-supervisor.log` records it.
 - Continuation is a **new turn** picking up the work, not a restore of the interrupted turn's in-memory state.
