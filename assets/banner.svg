@@ -1,48 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 268" width="900" height="268" role="img" aria-label="DSH 窗口示意图：顶部一条 24 像素高的横条显示倒计时与两个按钮，下方内容区和输入框完整可见、可继续输入">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="DSH 窗口示意图：顶部菜单行中间浮出一条浅灰圆角条，写着“DSH 将在 26 秒后重启”，右侧是蓝色实心的“立即重启”和描边的“稍后”，下方内容区和输入框完整可见">
   <defs>
-    <linearGradient id="strip" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FCF3E3"/>
-      <stop offset="100%" stop-color="#F8E9D2"/>
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F7F7F8"/>
+      <stop offset="100%" stop-color="#F2F2F4"/>
     </linearGradient>
   </defs>
 
   <!-- 窗口 -->
-  <rect x="8" y="8" width="884" height="252" rx="12" fill="#FFFFFF" stroke="#D8D3CB" stroke-width="1.5"/>
+  <rect x="8" y="8" width="884" height="252" rx="10" fill="#FFFFFF" stroke="#DCDCE0" stroke-width="1.5"/>
 
-  <!-- 顶部窗口 chrome（标题栏） -->
-  <path d="M8 20a12 12 0 0 1 12-12h868a12 12 0 0 1 12 12v26H8z" fill="#F4F1EC"/>
-  <circle cx="30" cy="27" r="4.5" fill="#D9D3C9"/>
-  <circle cx="46" cy="27" r="4.5" fill="#D9D3C9"/>
-  <circle cx="62" cy="27" r="4.5" fill="#D9D3C9"/>
-  <text x="86" y="31" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="#8C857A">DeepSeek Harness</text>
-  <text x="446" y="31" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="#8C857A">文件</text>
-  <text x="486" y="31" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="#8C857A">编辑</text>
-  <text x="526" y="31" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="#8C857A">视图</text>
+  <!-- 顶部 chrome：菜单行 -->
+  <path d="M8 18a10 10 0 0 1 10-10h864a10 10 0 0 1 10 10v34H8z" fill="url(#chrome)"/>
+  <!-- 侧栏折叠图标 -->
+  <rect x="26" y="26" width="13" height="12" rx="2.5" fill="none" stroke="#8A8A90" stroke-width="1.4"/>
+  <line x1="31" y1="26.5" x2="31" y2="37.5" stroke="#8A8A90" stroke-width="1.4"/>
+  <!-- 菜单 -->
+  <text x="56" y="36" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#3A3A40">应用</text>
+  <text x="96" y="36" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#3A3A40">编辑</text>
+  <text x="136" y="36" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#3A3A40">帮助</text>
 
-  <!-- 横条本体：24px 高，通栏，紧贴 chrome 下方 -->
-  <rect x="8" y="46" width="884" height="24" fill="url(#strip)"/>
-  <rect x="8" y="69" width="884" height="1.5" fill="#EBDCC2"/>
+  <!-- 横幅：居中浮出，浅灰圆角条，24px 高 -->
+  <rect x="330" y="17" width="330" height="26" rx="6" fill="#EFEFF1" stroke="#DEDEE3" stroke-width="1"/>
+  <text x="348" y="34" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#1C1C1E">DSH 将在 26 秒后重启</text>
 
-  <circle cx="32" cy="58" r="4" fill="#C8892E"/>
-  <text x="46" y="62.5" font-family="Segoe UI, system-ui, sans-serif" font-size="12.5" font-weight="600" fill="#6B4A15">DSH 将在 28 秒后重启</text>
-  <text x="188" y="62.5" font-family="Segoe UI, system-ui, sans-serif" font-size="11.5" fill="#8A6A38">· 装了插件更新，需要重启才能生效</text>
+  <!-- 立即重启：蓝色实心 -->
+  <rect x="522" y="21" width="76" height="18" rx="4" fill="#3B6EF2"/>
+  <text x="560" y="34" text-anchor="middle" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">立即重启</text>
 
-  <!-- 按钮：立即重启（实心，18px 高） -->
-  <rect x="672" y="49" width="84" height="18" rx="4" fill="#C8892E"/>
-  <text x="714" y="62" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">立即重启</text>
+  <!-- 稍后：白底描边 -->
+  <rect x="604" y="21" width="46" height="18" rx="4" fill="#FFFFFF" stroke="#D8D8DE" stroke-width="1"/>
+  <text x="627" y="34" text-anchor="middle" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#3A3A40">稍后</text>
 
-  <!-- 按钮：稍后（描边，18px 高） -->
-  <rect x="766" y="49" width="58" height="18" rx="4" fill="#FFFFFF" stroke="#D9C092" stroke-width="1"/>
-  <text x="795" y="62" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11.5" fill="#7A5C28">稍后</text>
+  <!-- 窗口右侧按钮 -->
+  <line x1="852" y1="31" x2="864" y2="31" stroke="#8A8A90" stroke-width="1.4"/>
+  <rect x="876" y="26" width="10" height="10" rx="1.5" fill="none" stroke="#8A8A90" stroke-width="1.3"/>
 
-  <!-- 内容区：说明横条不遮挡任何东西 -->
-  <rect x="28" y="92" width="200" height="9" rx="4.5" fill="#EAE6DF"/>
-  <rect x="28" y="112" width="560" height="9" rx="4.5" fill="#EAE6DF"/>
-  <rect x="28" y="132" width="520" height="9" rx="4.5" fill="#EAE6DF"/>
-  <rect x="28" y="152" width="600" height="9" rx="4.5" fill="#EAE6DF"/>
-  <rect x="28" y="172" width="380" height="9" rx="4.5" fill="#EAE6DF"/>
+  <!-- 内容区 -->
+  <rect x="28" y="76" width="196" height="9" rx="4.5" fill="#ECECEF"/>
+  <rect x="28" y="96" width="548" height="9" rx="4.5" fill="#ECECEF"/>
+  <rect x="28" y="116" width="508" height="9" rx="4.5" fill="#ECECEF"/>
+  <rect x="28" y="136" width="588" height="9" rx="4.5" fill="#ECECEF"/>
+  <rect x="28" y="156" width="368" height="9" rx="4.5" fill="#ECECEF"/>
 
-  <!-- 输入框：说明可以继续打字 -->
-  <rect x="28" y="196" width="844" height="46" rx="10" fill="#FFFFFF" stroke="#DCD6CC" stroke-width="1.5"/>
-  <text x="48" y="224" font-family="Segoe UI, system-ui, sans-serif" font-size="12.5" fill="#A9A29A">继续打字……</text>
+  <!-- 输入框 -->
+  <rect x="28" y="184" width="844" height="46" rx="10" fill="#FFFFFF" stroke="#DCDCE0" stroke-width="1.5"/>
+  <text x="48" y="212" font-family="'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#A6A6AE">继续打字……</text>
 </svg>

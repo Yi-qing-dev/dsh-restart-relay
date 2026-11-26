@@ -30,7 +30,7 @@ if (-not (Test-Path $script)) {
 # The console is a short-lived one-shot: it exists only while the restart runs
 # and closes with the process. It is not a resident task either — the task is
 # deleted by the caller once the restart completes.
-$arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -GraceSeconds {1} -HostPid {2}' -f $script, $DelaySeconds, $HostPid
+$arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -GraceSeconds {1} -HostPid {2} -QuietWindow' -f $script, $DelaySeconds, $HostPid
 if ($DryRun) { $arguments += ' -DryRun -SkipApproval' }
 
 $xml = @"

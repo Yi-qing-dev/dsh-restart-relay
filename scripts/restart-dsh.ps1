@@ -6,16 +6,21 @@ param(
   [int]$MaxAttempts = 3,
   [int]$HostPid = 0,
   [switch]$SkipApproval,
-  [switch]$DryRun
+  [switch]$DryRun,
+  # Set by trigger-restart.ps1, i.e. only when we were launched by the scheduler.
+  # Never move the window of a console a human started by hand.
+  [switch]$QuietWindow
 )
 
-# Foreground mode: the plugin launches the restarter with a visible window and
-# without this switch, so the user SEES the console that is doing the killing.
-# That matters because security suites (火绒, 360, 电脑管家…) flag precisely the
-# combination "svchost → hidden powershell → silently kills a process tree".
-# A visible, one-shot console reads as "the app the user just clicked", while
-# hidden-and-lurking reads as malicious. The window closes on exit because the
-# console was started solely for this process.
+# The console stays VISIBLE on purpose: security suites flag "svchost → hidden
+# powershell → silently kills a process tree", and a visible window does not read
+# as malicious.
+#
+# Visible does not have to mean a big black box over everything. With -QuietWindow
+# the window is shrunk and parked in the bottom-right corner, pushed to the bottom
+# of the z-order (HWND_BOTTOM), so it never covers the user's work: it is only a
+# small window they can find if they go looking, and it disappears when this
+# process exits.
 
 $ErrorActionPreference = 'Continue'
 $dsh = Join-Path $env:USERPROFILE '.dsh'
@@ -30,6 +35,44 @@ function Write-Log([string]$message) {
   $line = '[{0}] {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $message
   Add-Content -Path $log -Value $line -Encoding UTF8
 }
+
+# Shrink this process's own console and park it in the bottom-right corner, at the
+# bottom of the z-order. Verified on Windows 11 + Windows Terminal as the default
+# terminal: GetConsoleWindow() returns a real handle there, and SetWindowPos moves
+# it. Declaring DPI awareness first matters — without it the screen metrics come
+# back virtualised (1707x1019 on a 2560x1600 display) and the window lands in the
+# wrong place.
+function Set-QuietWindow {
+  try {
+    Add-Type -Namespace DshRelay -Name Win -MemberDefinition @'
+[DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow();
+[DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+[DllImport("user32.dll")] public static extern int GetSystemMetrics(int index);
+[DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+'@ -ErrorAction Stop
+
+    [void][DshRelay.Win]::SetProcessDPIAware()
+    $screenW = [DshRelay.Win]::GetSystemMetrics(0)
+    $screenH = [DshRelay.Win]::GetSystemMetrics(1)
+    $hwnd = [DshRelay.Win]::GetConsoleWindow()
+    if ($hwnd -eq [IntPtr]::Zero) {
+      Write-Log 'quiet window: no console handle; leaving the window alone'
+      return
+    }
+
+    $w = 380
+    $h = 96
+    $x = $screenW - $w - 16
+    $y = $screenH - $h - 60      # keep clear of the taskbar
+    # HWND_BOTTOM = 1 (never covers anything), SWP_NOACTIVATE = 0x0010
+    $ok = [DshRelay.Win]::SetWindowPos($hwnd, [IntPtr]1, $x, $y, $w, $h, 0x0010)
+    Write-Log ("quiet window: moved to {0},{1} {2}x{3} (screen {4}x{5}) -> {6}" -f $x, $y, $w, $h, $screenW, $screenH, $ok)
+  } catch {
+    Write-Log ("quiet window failed: {0}" -f $_.Exception.Message)
+  }
+}
+
+if ($QuietWindow) { Set-QuietWindow }
 
 # Walk up from the DSH host process to the Electron main process that owns it.
 # Killing only this tree leaves any other DSH instance (e.g. one running inside

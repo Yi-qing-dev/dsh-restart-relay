@@ -147,7 +147,7 @@ Start with these two logs — they answer most questions directly:
 ## Safety
 
 - **It closes DSH and opens it again** — that is what a restart is. If you have unsaved work, the countdown is your buffer, and clicking "later" stops it from touching anything.
-- A **visible PowerShell / terminal window** appears during the restart and closes on its own a few seconds later. That is deliberate: a *hidden* PowerShell is exactly the pattern antivirus suites flag and block (Huorong, 360 and friends). A visible one is not.
+- A **PowerShell / terminal window** appears during the restart, but it is shrunk to 380×96, parked in the bottom-right corner and pushed to the bottom of the z-order, so it **never covers your windows**; it disappears when the process exits. Keeping it visible is deliberate: a *hidden* PowerShell is exactly the pattern antivirus suites flag and block (Huorong, 360 and friends).
 - **If your security software asks**, allow it and tick "remember this action". Otherwise the restart fails.
 - It does not talk to the network and sends no data. The only network activity is a loopback `127.0.0.1` route the strip polls for state.
 - The restarter reads the running DSH executable path and relaunches exactly that. It never downloads or updates anything.
@@ -157,7 +157,7 @@ Start with these two logs — they answer most questions directly:
 ## Known limitations
 
 - **Windows + DSH Desktop (the `desktop` profile) only.** macOS / Linux and the `web` / `tui` profiles are untested.
-- A visible console window appears during the restart (see above). Cleanup runs on the next boot, so it can linger until the new process is up.
+- That terminal window sits small in the bottom-right corner at the bottom of the z-order (see above); cleanup runs on the next boot, so it can linger until the new process is up.
 - The engine itself prints "task stopped / this turn was interrupted" for the turn it cut off. **That message cannot be removed** — it is core behaviour. The continuation prompt exists so the receiving session knows it is expected and keeps working instead of stopping to ask.
 - Task Scheduler launches PowerShell under `svchost`. A strict security policy can still block it; when that happens, `restart-supervisor.log` records it.
 - Continuation is a **new turn** picking up the work, not a restore of the interrupted turn's in-memory state.
